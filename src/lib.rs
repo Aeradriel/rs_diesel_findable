@@ -1,7 +1,6 @@
 extern crate proc_macro;
 #[macro_use]
 extern crate quote;
-extern crate json_errors;
 extern crate proc_macro2;
 extern crate regex;
 extern crate syn;
