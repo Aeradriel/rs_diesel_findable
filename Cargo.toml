@@ -1,0 +1,16 @@
+[package]
+name = "diesel_findable"
+version = "0.1.0"
+authors = ["Thibaut Roche <thibaut.roche.perso@gmail.com>"]
+licene = "MIT"
+repository = ""
+
+[dependencies]
+syn = "0.15.20"
+quote = "0.6.10"
+regex = "1.0.6"
+proc-macro2 = "0.4.23"
+json_errors = "0.2.1"
+
+[lib]
+proc-macro = true
