@@ -46,7 +46,7 @@ pub fn findable_by(args: TokenStream, input: TokenStream) -> TokenStream {
 
             let find_by_func = quote! {
                 impl #struct_name {
-                    fn #func_name(attr: #attr_type, conn: &PgConnection) -> Option<#struct_name> {
+                    pub fn #func_name(attr: #attr_type, conn: &PgConnection) -> Option<#struct_name> {
                         use schema::#table_name::dsl::#struct_attribute as #struct_attribute_col;
 
                         match #table_name::table.filter(#struct_attribute_col.eq(attr)).first(conn) {
