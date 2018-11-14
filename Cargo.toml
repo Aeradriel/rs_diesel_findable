@@ -2,8 +2,9 @@
 name = "diesel_findable"
 version = "0.1.0"
 authors = ["Thibaut Roche <thibaut.roche.perso@gmail.com>"]
-licene = "MIT"
-repository = ""
+license = "MIT"
+repository = "https://github.com/Aeradriel/rs_diesel_findable"
+description = "Macro to generate find_by_{attr} functions"
 
 [dependencies]
 syn = "0.15.20"
