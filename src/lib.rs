@@ -46,12 +46,13 @@ pub fn findable_by(args: TokenStream, input: TokenStream) -> TokenStream {
 
             let find_by_func = quote! {
                 impl #struct_name {
-                    fn #func_name(attr: #attr_type, conn: &PgConnection) -> Result<#struct_name, JsonErrors> {
+                    fn #func_name(attr: #attr_type, conn: &PgConnection) -> Option<#struct_name> {
                         use schema::#table_name::dsl::#struct_attribute as #struct_attribute_col;
 
-                        let res = #table_name::table.filter(#struct_attribute_col.eq(attr)).first(conn)?;
-
-                        Ok(res)
+                        match #table_name::table.filter(#struct_attribute_col.eq(attr)).first(conn) {
+                            Ok(res) => Some(res),
+                            Err(_) => None,
+                        }
                     }
                 }
             };
