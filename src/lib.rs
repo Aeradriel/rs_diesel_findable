@@ -24,49 +24,68 @@ pub fn findable_by(args: TokenStream, input: TokenStream) -> TokenStream {
     let struct_name = ast.ident;
 
     for struct_attribute in struct_attributes {
-        let mut attr_type = "".to_string();
-        let field: Vec<&Field> = fields
-            .iter()
-            .filter(|f| f.ident.clone().unwrap().to_string() == struct_attribute)
-            .collect();
+        let func = gen_find_by_func(
+            &struct_name.to_string(),
+            &string_input.clone(),
+            struct_attribute,
+            &fields,
+        );
 
-        if field.len() > 0 {
-            let field = field[0];
-
-            if let Type::Path(ref field_type) = field.ty {
-                attr_type = field_type.path.segments[0].ident.to_string();
-            }
-
-            let func_name = Ident::new(&format!("find_by_{}", struct_attribute), Span::call_site());
-            let struct_attribute = Ident::new(&struct_attribute, Span::call_site());
-            let struct_attribute_col =
-                Ident::new(&format!("{}_col", struct_attribute), Span::call_site());
-            let attr_type = Ident::new(&attr_type, Span::call_site());
-            let table_name = Ident::new(&get_table_name(string_input.clone()), Span::call_site());
-
-            let find_by_func = quote! {
-                impl #struct_name {
-                    pub fn #func_name(attr: & #attr_type, conn: &PgConnection) -> Option<#struct_name> {
-                        use schema::#table_name::dsl::#struct_attribute as #struct_attribute_col;
-
-                        match #table_name::table.filter(#struct_attribute_col.eq(attr)).first(conn) {
-                            Ok(res) => Some(res),
-                            Err(_) => None,
-                        }
-                    }
-                }
-            };
-
-            string_input.push_str(&find_by_func.to_string());
-        } else {
-            panic!(
-                "Attribute {} not found in {}",
-                struct_attribute, struct_name
-            );
-        }
+        string_input.push_str(&func);
     }
 
     string_input.parse().unwrap()
+}
+
+fn gen_find_by_func(
+    struct_name: &str,
+    string_input: &str,
+    struct_attribute: &str,
+    fields: &Vec<Field>,
+) -> String {
+    let mut attr_type = "".to_string();
+    let field: Vec<&Field> = fields
+        .iter()
+        .filter(|f| f.ident.clone().unwrap().to_string() == struct_attribute)
+        .collect();
+
+    if field.len() > 0 {
+        let field = field[0];
+
+        if let Type::Path(ref field_type) = field.ty {
+            attr_type = field_type.path.segments[0].ident.to_string();
+        }
+
+        let struct_name = Ident::new(&format!("{}", struct_name), Span::call_site());
+        let func_name = Ident::new(&format!("find_by_{}", struct_attribute), Span::call_site());
+        let struct_attribute = Ident::new(&struct_attribute, Span::call_site());
+        let struct_attribute_col =
+            Ident::new(&format!("{}_col", struct_attribute), Span::call_site());
+        let attr_type = Ident::new(&attr_type, Span::call_site());
+        let table_name = Ident::new(
+            &get_table_name(string_input.to_string().clone()),
+            Span::call_site(),
+        );
+        let func = quote! {
+            impl #struct_name {
+                pub fn #func_name(attr: & #attr_type, conn: &PgConnection) -> Option<#struct_name> {
+                    use schema::#table_name::dsl::#struct_attribute as #struct_attribute_col;
+
+                    match #table_name::table.filter(#struct_attribute_col.eq(attr)).first(conn) {
+                        Ok(res) => Some(res),
+                        Err(_) => None,
+                    }
+                }
+            }
+        };
+
+        func.to_string()
+    } else {
+        panic!(
+            "Attribute {} not found in {}",
+            struct_attribute, struct_name
+        );
+    }
 }
 
 fn get_table_name(input: String) -> String {
