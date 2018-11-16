@@ -1,3 +1,5 @@
+#![feature(extern_crate_item_prelude)]
+
 extern crate proc_macro;
 #[macro_use]
 extern crate quote;
@@ -69,7 +71,7 @@ fn gen_find_by_func(
         let func = quote! {
             impl #struct_name {
                 pub fn #func_name(attr: & #attr_type, conn: &PgConnection) -> Option<#struct_name> {
-                    use schema::#table_name::dsl::#struct_attribute as #struct_attribute_col;
+                    use crate::schema::#table_name::dsl::#struct_attribute as #struct_attribute_col;
 
                     match #table_name::table.filter(#struct_attribute_col.eq(attr)).first(conn) {
                         Ok(res) => Some(res),
