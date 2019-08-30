@@ -9,7 +9,7 @@ extern crate syn;
 
 use proc_macro::TokenStream;
 use proc_macro2::Span;
-use syn::{DeriveInput, Field, Ident, Type};
+use syn::{DeriveInput, Field, Ident};
 
 #[proc_macro_attribute]
 pub fn findable_by(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -45,7 +45,6 @@ fn gen_find_by_func(
     struct_attribute: &str,
     fields: &Vec<Field>,
 ) -> String {
-    let mut attr_type = "".to_string();
     let field: Vec<&Field> = fields
         .iter()
         .filter(|f| f.ident.clone().unwrap().to_string() == struct_attribute)
@@ -53,10 +52,7 @@ fn gen_find_by_func(
 
     if field.len() > 0 {
         let field = field[0];
-
-        if let Type::Path(ref field_type) = field.ty {
-            attr_type = field_type.path.segments[0].ident.to_string();
-        }
+        let attr_type = &field.ty;
 
         let struct_name = Ident::new(&format!("{}", struct_name), Span::call_site());
         let func_name = Ident::new(&format!("find_by_{}", struct_attribute), Span::call_site());
@@ -67,7 +63,6 @@ fn gen_find_by_func(
         let struct_attribute = Ident::new(&struct_attribute, Span::call_site());
         let struct_attribute_col =
             Ident::new(&format!("{}_col", struct_attribute), Span::call_site());
-        let attr_type = Ident::new(&attr_type, Span::call_site());
         let table_name = Ident::new(
             &get_table_name(string_input.to_string().clone()),
             Span::call_site(),
