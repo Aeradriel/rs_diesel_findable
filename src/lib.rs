@@ -9,6 +9,7 @@ extern crate syn;
 
 use proc_macro::TokenStream;
 use proc_macro2::Span;
+use regex::Regex;
 use syn::{DeriveInput, Field, Ident};
 
 #[proc_macro_attribute]
@@ -24,6 +25,7 @@ pub fn findable_by(args: TokenStream, input: TokenStream) -> TokenStream {
     let struct_attributes = string_args.replace(" ", "").replace("\"", "");
     let struct_attributes: Vec<&str> = struct_attributes.split(",").collect();
     let struct_name = ast.ident;
+    let re = Regex::new(r###"#\[table_name = "(.*)"\]"###).unwrap();
 
     for struct_attribute in struct_attributes {
         let func = gen_find_by_func(
@@ -36,7 +38,7 @@ pub fn findable_by(args: TokenStream, input: TokenStream) -> TokenStream {
         string_input.push_str(&func);
     }
 
-    string_input.parse().unwrap()
+    re.replace_all(&string_input, "").parse().unwrap()
 }
 
 fn gen_find_by_func(
@@ -96,8 +98,6 @@ fn gen_find_by_func(
 }
 
 fn get_table_name(input: String) -> String {
-    use regex::Regex;
-
     let re = Regex::new(r###"#\[table_name = "(.*)"\]"###).unwrap();
     let table_name_attr = input
         .lines()

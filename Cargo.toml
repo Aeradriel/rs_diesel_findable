@@ -1,6 +1,6 @@
 [package]
 name = "diesel_findable"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Thibaut Roche <thibaut.roche.perso@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/Aeradriel/rs_diesel_findable"
